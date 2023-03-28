@@ -116,3 +116,7 @@
   116  python main.py --base configs/custom_vqgan.yaml -t True
   117  history
   118  history > useful.sh
+
+
+git config --global user.email "albin.jaldevik@gmail.com"
+git config user.name "Albin Jaldevik"
