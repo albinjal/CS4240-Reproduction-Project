@@ -1,0 +1,118 @@
+    1  ls
+    2  code .
+    3  ks
+    4  ls
+    5  git clone https://github.com/albinjal/CS4240-Reproduction-Project
+    6  ls
+    7  sudo apt-get update
+    8  sudo apt install git
+    9  git clone https://github.com/albinjal/CS4240-Reproduction-Project
+   10  cd CS4240-Reproduction-Project/
+   11  ls
+   12  conda --help
+   13  python --help
+   14  cd ..
+   15  ls
+   16  mkdir -p ~/miniconda3
+   17  wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda3/miniconda.sh
+   18  bash ~/miniconda3/miniconda.sh -b -u -p ~/miniconda3
+   19  rm -rf ~/miniconda3/miniconda.sh
+   20  ~/miniconda3/bin/conda init bash
+   21  ~/miniconda3/bin/conda init zsh
+   22  ls
+   23  wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda3/miniconda.sh
+   24  sudo apt install wget
+   25  wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda3/miniconda.sh
+   26  bash ~/miniconda3/miniconda.sh -b -u -p ~/miniconda3
+   27  rm -rf ~/miniconda3/miniconda.sh
+   28  ~/miniconda3/bin/conda init bash
+   29  ~/miniconda3/bin/conda init zsh
+   30  ls
+   31  conda init
+   32  ls
+   33  cd CS4240-Reproduction-Project/
+   34  conda env create -f environment.yaml
+   35  conda activate taming
+   36  ls
+   37  conda activate taming
+   38  pip install -e .
+   39  python scripts/sample_fast.py -r
+   40  ls
+   41  wget https://app.koofr.net/content/links/3d785240-245a-4e5e-befa-97edf76633c2/files/get/2021-01-20T16-04-20_coco_transformer.zip?path=%2F&force
+   42  wget https://omnomnom.vision.rwth-aachen.de/data/atari_v1_release/revenge.tar.gz
+   43  ls
+   44  sudo df -Th
+   45  sudo lsblk
+   46  sudo parted -l
+   47  sudo lsblk
+   48  sudo parted -l
+   49  wget https://omnomnom.vision.rwth-aachen.de/data/atari_v1_release/revenge.tar.gz
+   50  sudo parted -l
+   51  sudo parted /dev/sda
+   52  sudo parted -l
+   53  sudo parted 1
+   54  sudo df -Th
+   55  sudo lsblk
+   56  sudo df -Th
+   57  sudo parted -l /dev/nvme0n1p1
+   58  sudo parted /dev/nvme0n1p1
+   59  sudo partprobe /dev/nvme0n1p1
+   60  sudo parted -l /dev/nvme0n1p1
+   61  sudo lsblk
+   62  sudo df -Th
+   63  sudo resize2fs /dev/nvme0n1p1
+   64  sudo xfs_growfs -d /
+   65  sudo resize2fs
+   66  df -h /dev/nvme0n1p1
+   67  clear
+   68  sudo df -Th
+   69  sudo lsblk
+   70  sudo parted nvme0n1p1
+   71  sudo parted /dev/nvme0n1p1
+   72  ls
+   73  sudo parted /dev/nvme0n1p1
+   74  sudo lsblk
+   75  sudo df -Th
+   76  sudo gparted
+   77  sudo parted
+   78  ls
+   79  wget https://omnomnom.vision.rwth-aachen.de/data/atari_v1_release/revenge.tar.gz
+   80  sudo resize2fs /dev/nvme0n1p1
+   81  wget https://omnomnom.vision.rwth-aachen.de/data/atari_v1_release/revenge.tar.gz
+   82  unzip revenge.tar.gz
+   83  apt-get install unzip
+   84  ! sudo apt-get install p7zip-full
+   85  unzip revenge.tar.gz
+   86  sudo apt-get install unzip
+   87  unzip revenge.tar.gz
+   88  gzip -d revenge.tar.gz
+   89  tar -xf revenge.tar.gz
+   90  ls
+   91  cd revenge
+   92  ls
+   93  cd
+   94  ls
+   95  cd CS4240-Reproduction-Project/
+   96  ls
+   97  sudo lsblk
+   98  sudo df -Th
+   99  ls
+  100  find $(pwd)/atari_v1/screens/1 -name "*.png" > train.txt
+  101  find $(pwd)/atari_v1/screens/revenge/1 -name "*.png" > train.txt
+  102  find $(pwd)/atari_v1/screens/revenge/3 -name "*.png" > test.txt
+  103  python main.py --base configs/custom_vqgan.yaml -t True --gpus 0,
+  104  pip install omegaconf
+  105  python main.py --base configs/custom_vqgan.yaml -t True --gpus 0,
+  106  conda activate taming
+  107  python main.py --base configs/custom_vqgan.yaml -t True --gpus 0,
+  108  python main.py --base configs/custom_vqgan.yaml -t True --gpus 0,0
+  109  python main.py --base configs/custom_vqgan.yaml -t True --gpus 0,
+  110  python main.py --base configs/custom_vqgan.yaml -t True
+  111  sudo apt-get update
+  112  sudo apt-get install libsm6 libxext6 libxrender-dev
+  113  python main.py --base configs/custom_vqgan.yaml -t True
+  114  :> agents_to_install.csv && echo '"projects/deeplearning-381512/zones/europe-west4-a/instances/dl-reprod","[{""type"":""ops-agent""}]"' >> agents_to_install.csv && curl -sSO https://dl.google.com/cloudagents/mass-provision-google-cloud-ops-agents.py && python3 mass-provision-google-cloud-ops-agents.py --file agents_to_install.csv
+  115  ls
+  116  python main.py --base configs/custom_vqgan.yaml -t True
+  117  history
+  118  history > useful.sh
