@@ -5,8 +5,6 @@ Here we add some motivation about why we chose this paper in the first place.
 
 In this paragraph we explain the paper shortly -> what it does and tries to achieve.
 
-
-
 ## Building the VQGAN from Scratch (AVI)
 Explain briefly what a VQGAN is and the architecture behind it.
 
