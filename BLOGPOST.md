@@ -6,11 +6,13 @@ Here we add some motivation about why we chose this paper in the first place.
 In this paragraph we explain the paper shortly -> what it does and tries to achieve.
 
 ## Building the VQGAN from Scratch (AVI)
-Explain briefly what a VQGAN is and the architecture behind it.
-The VQGAN model is a type of autoencoder that uses vector quantization as a bottleneck between the encoder and the decoder. Below you can see the visualisation of it.
-![VQ_GAN](Images_blogpost/teaser.png)
-The quantization has a similar effect as for example making the layers in the middle very small (in the case of a stacked autoencoder) or by making the encoder output the sufficient statistics of a normal distribution and sampling this distribution and feeding that to the decoder (variational autoencoder). The entire model was implemented from scratch, however since this the code is quite lengthy we'll only share a small segment regarding the vector quantization.
+The VQGAN model is an autoencoder that utilizes vector quantization as a bottleneck between the encoder and decoder. This quantization technique has a similar effect to reducing the size of layers in the middle of a stacked autoencoder or by having the encoder output the sufficient statistics of a normal distribution and feeding them to the decoder (as in a variational autoencoder). Quantization has an advantage over sampling in that it doesn't result in blurry output for the decoded image, unlike sampling which often produces blurry images.
 
+Below you can see a visualization of the VQGAN.
+
+![VQ_GAN](Images_blogpost/teaser.png)
+
+The model consists of an encoder, a decoder, and a discriminator that differentiates real from fake images, making it a VQGAN rather than just a VQVAE. While the entire model was implemented from scratch, we will focus on a small segment of the code that handles vector quantization.
 ```
 class Codebook(nn.Module):
     def __init__(self,args):
@@ -44,18 +46,21 @@ class Codebook(nn.Module):
 
         return z_q, min_enc_indices, loss 
 ```
+
 Here we construct a Codebook class with `self.num_codebook_vectors` number of codebook vectors. Each having dimension `self.latent_dim`. 
 The codebook vectors are stored in a `nn.Embedding` layer, with `self.num_codebook_vectors` number of embeddings each of size `self.latent_dim`.
 
-In the forward function we see that we start with a $z$ with dimension $[N,H,W,C]$, where $N$ is the batch size $H$ is the height of the image $W$ is the width of the image and $C$ is the number of channels in of the image. Which we then permute and reshape to get a $z_{flattened}$ which has the shape of $[N*H*W,C]$. We then calculate the euclidean distance of $z_{flattened}$ to every codebook vector and store these distances in $d$. After which we calculate the indices corresponding to the smallest distances, and store the result in `min_enc_indices`. The quantized latent vectors $z_q$ are then obtained through indexing the codebook by applying `self.embedding(min_enc_indices)`.
+In the forward function we see that we start with a $z$ with dimension $[N,H,W,C]$, where $N$ is the batch size $H$ is the height of the image $W$ is the width of the image and $C$ is the number of channels in of the image. Which we then permute and reshape to get a $z_{flattened}$ which has the shape of $[N*H*W,C]$. We then calculate the euclidean distance of $z_{flattened}$ to every codebook vector and store these distances in $d$. After which we calculate the indices corresponding to the smallest distances, and store the result in `min_enc_indices`. The quantized latent vectors $z_q$ are then obtained through indexing the codebook with `self.embedding(min_enc_indices)`.
 
 To relate what has happened up to this point to the image shown before, putting the code into more mathematical terms we've done the following:
 $$z_{\mathbb{q}} = \arg \min_{z_i \in \mathcal{Z}} ||\hat{z}-z||$$
-Where $\mathcal{Z}$ is the codebook. Now, the quantized $z_{\mathbb{q}}$ does not have the gradients of $z$. So that is why we use a trick that is referred to as the straight through estimator: `z_q = z + (z_q-z).detach() `, here we make the value of $z_q$ equal to the value of $z_q$ but it has the exact same gradients as $z$. This is because $z$ gets canceled again in the expression however the gradient will not since the component that cancels z won't contribute any gradient because of the `.detach()` method that was called on it.
+Where $\mathcal{Z}$ is the codebook. 
 
+Now, the quantized $z_{\mathbb{q}}$ does not have the gradients of $z$. To ensure that they do have the same gradient we use a trick that is referred to as the straight through estimator: `z_q = z + (z_q-z).detach() `. We keep the value of $z_q$ equal to its original value but it has the exact same gradients as $z$. This is because $z$ gets canceled by $(z_q-z)$,  however the gradient will not be canceled because of the `.detach()` method that was called on it. 
+
+All in all, the VQGAN model is a powerful tool for generating high quality images using vector quantization in the autoencoder architecture together with a discriminator. 
 The code above is written in PyTorch, whereas the code on the github page was written in pytorch lightning so we also changed the framework.
 
-Now, if it was just the encoder and the decoder it would be a VQVAE however we also have a discriminator that tries to differentiate real from fake pictures. Hence why its called a VQGAN. 
 
 ## Running the Paper's VQGAN + Transformer on old data
 Explain how to run the original code on the old dataset. Also explain why COCO and the motivation.
