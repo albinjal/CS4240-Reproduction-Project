@@ -9,7 +9,7 @@ In this paragraph we explain the paper shortly -> what it does and tries to achi
 Explain briefly what a VQGAN is and the architecture behind it.
 The VQGAN model is a type of autoencoder that uses vector quantization as a bottleneck between the encoder and the decoder. Below you can see the visualisation of it.
 ![VQ_GAN](Images_blogpost/teaser.png)
-The quantisation has a similar effect as for example making the layers in the middle very small (in the case of a stacked autoencoder) or by making the encoder output the sufficient statistics of a normal distribution and sampling this distribution and feeding that to the decoder (variational autoencoder). The entire model was implemented from scratch, however since this the code is quite lengthy we'll only share a small segment regarding the vector quantization.
+The quantization has a similar effect as for example making the layers in the middle very small (in the case of a stacked autoencoder) or by making the encoder output the sufficient statistics of a normal distribution and sampling this distribution and feeding that to the decoder (variational autoencoder). The entire model was implemented from scratch, however since this the code is quite lengthy we'll only share a small segment regarding the vector quantization.
 
 ```
 class Codebook(nn.Module):
