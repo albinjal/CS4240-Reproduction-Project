@@ -13,7 +13,7 @@ Below you can see a visualization of the VQGAN.
 ![VQ_GAN](Images_blogpost/teaser.png)
 
 The model consists of an encoder, a decoder, and a discriminator that differentiates real from fake images, making it a VQGAN rather than just a VQVAE. While the entire model was implemented from scratch, we will focus on a small segment of the code that handles vector quantization.
-```
+```python
 class Codebook(nn.Module):
     def __init__(self,args):
         super(Codebook,self).__init__()
@@ -39,26 +39,26 @@ class Codebook(nn.Module):
         z_q = self.embedding(min_enc_indices).view(z.shape)
         loss = torch.mean((z_q.detach()-z)**2)+ self.beta * torch.mean((z_q-z.detach())**2)
         # above we first remove the gradient from the quantized latent vectors from the gradient flow and substract it from the original latent vector
-        # in the second part we remove tha gradient from the original latent vector and keep the one of the quantized latent vector and substract them 
+        # in the second part we remove tha gradient from the original latent vector and keep the one of the quantized latent vector and substract them
 
         z_q = z + (z_q-z).detach() # here we make sure that z_q has the gradient of z but keeps its quantized value
-        z_q = z_q.permute(0,3,1,2) 
+        z_q = z_q.permute(0,3,1,2)
 
-        return z_q, min_enc_indices, loss 
+        return z_q, min_enc_indices, loss
 ```
 
-Here we construct a Codebook class with `self.num_codebook_vectors` number of codebook vectors. Each having dimension `self.latent_dim`. 
+Here we construct a Codebook class with `self.num_codebook_vectors` number of codebook vectors. Each having dimension `self.latent_dim`.
 The codebook vectors are stored in a `nn.Embedding` layer, with `self.num_codebook_vectors` number of embeddings each of size `self.latent_dim`.
 
 In the forward function we see that we start with a $z$ with dimension $[N,H,W,C]$, where $N$ is the batch size $H$ is the height of the image $W$ is the width of the image and $C$ is the number of channels in of the image. Which we then permute and reshape to get a $z_{flattened}$ which has the shape of $[N\cdot H \cdot W,C]$. We then calculate the euclidean distance of $z_{flattened}$ to every codebook vector and store these distances in $d$. After which we calculate the indices corresponding to the smallest distances, and store the result in `min_enc_indices`. The quantized latent vectors $z_q$ are then obtained through indexing the codebook with `self.embedding(min_enc_indices)`.
 
 To relate what has happened up to this point to the image shown before, putting the code into more mathematical terms we've done the following:
 $$z_{\mathbf{q}} = \arg \min_{z_i \in \mathcal{Z}} ||\hat{z}-z||$$
-Where $\mathcal{Z}$ is the codebook. 
+Where $\mathcal{Z}$ is the codebook.
 
-Now, the quantized $z_{\mathbf{q}}$ does not have the gradients of $z$. To ensure that they do have the same gradient we use a trick that is referred to as the straight through estimator: `z_q = z + (z_q-z).detach() `. We keep the value of $z_q$ equal to its original value but it has the exact same gradients as $z$. This is because $z$ gets canceled by $(z_q-z)$,  however the gradient will not be canceled because of the `.detach()` method that was called on it. 
+Now, the quantized $z_{\mathbf{q}}$ does not have the gradients of $z$. To ensure that they do have the same gradient we use a trick that is referred to as the straight through estimator: `z_q = z + (z_q-z).detach() `. We keep the value of $z_q$ equal to its original value but it has the exact same gradients as $z$. This is because $z$ gets canceled by $(z_q-z)$,  however the gradient will not be canceled because of the `.detach()` method that was called on it.
 
-All in all, the VQGAN model is a powerful tool for generating high quality images using vector quantization in the autoencoder architecture together with a discriminator. 
+All in all, the VQGAN model is a powerful tool for generating high quality images using vector quantization in the autoencoder architecture together with a discriminator.
 The code above is written in PyTorch, whereas the code on the github page was written in pytorch lightning so we also changed the framework.
 
 
