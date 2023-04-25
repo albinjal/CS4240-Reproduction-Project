@@ -3,7 +3,6 @@ import torch
 import numpy as np
 from omegaconf import OmegaConf
 import streamlit as st
-from streamlit import caching
 from PIL import Image
 from main import instantiate_from_config, DataModuleFromConfig
 from torch.utils.data import DataLoader
@@ -264,6 +263,10 @@ def load_model_from_config(config, sd, gpu=True, eval_mode=True):
         st.info(f"Unexpected Keys in State Dict: {unexpected}")
     if gpu:
         model.cuda()
+    if torch.backends.mps.is_available():
+        model.to("mps")
+    else:
+        print ("MPS device not found.")
     if eval_mode:
         model.eval()
     return {"model": model}
@@ -341,7 +344,7 @@ if __name__ == "__main__":
     gs.text(f"Global step: ?")
     st.sidebar.text("Options")
     #gpu = st.sidebar.checkbox("GPU", value=True)
-    gpu = True
+    gpu = False
     #eval_mode = st.sidebar.checkbox("Eval Mode", value=True)
     eval_mode = True
     #show_config = st.sidebar.checkbox("Show Config", value=False)
