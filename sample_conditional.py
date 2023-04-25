@@ -343,7 +343,7 @@ if __name__ == "__main__":
     gs.text(f"Global step: ?")
     st.sidebar.text("Options")
     #gpu = st.sidebar.checkbox("GPU", value=True)
-    gpu = False
+    gpu = True
     #eval_mode = st.sidebar.checkbox("Eval Mode", value=True)
     eval_mode = True
     #show_config = st.sidebar.checkbox("Show Config", value=False)

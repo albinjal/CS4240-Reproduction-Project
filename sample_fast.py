@@ -238,7 +238,7 @@ if __name__ == "__main__":
     cli = OmegaConf.from_dotlist(unknown)
     config = OmegaConf.merge(*configs, cli)
 
-    model, global_step = load_model(config, ckpt, gpu=False, eval_mode=True)
+    model, global_step = load_model(config, ckpt, gpu=True, eval_mode=True)
 
     if opt.outdir:
         print(f"Switching logdir from '{logdir}' to '{opt.outdir}'")
