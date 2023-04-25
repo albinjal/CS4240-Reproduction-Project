@@ -185,7 +185,10 @@ def load_model_from_config(config, sd, gpu=True, eval_mode=True):
     if sd is not None:
         model.load_state_dict(sd)
     if gpu:
-        model.cuda()
+        if torch.backends.mps.is_available():
+            model.to("mps")
+        else:
+            model.cuda()
     if eval_mode:
         model.eval()
     return {"model": model}

@@ -262,11 +262,10 @@ def load_model_from_config(config, sd, gpu=True, eval_mode=True):
         st.info(f"Missing Keys in State Dict: {missing}")
         st.info(f"Unexpected Keys in State Dict: {unexpected}")
     if gpu:
-        model.cuda()
-    if torch.backends.mps.is_available():
-        model.to("mps")
-    else:
-        print ("MPS device not found.")
+        if torch.backends.mps.is_available():
+            model.to("mps")
+        else:
+            model.cuda()
     if eval_mode:
         model.eval()
     return {"model": model}
