@@ -65,8 +65,10 @@ Now, the quantized $z_{\mathbf{q}}$ does not have the gradients of $z$. To ensur
 All in all, the VQGAN model is a powerful tool for generating high quality images using vector quantization in the autoencoder architecture together with a discriminator.
 The code above is written in PyTorch, whereas the code on the github page was written in pytorch lightning so we also changed the framework.
 
-
 ## Running the Paper's VQGAN + Transformer on old data
+
+To verify the claims of the original paper, we decided to run multiple experiments on the COCO dataset which is also used by the authors.
+
 
 Explain how to run the original code on the old dataset. Also explain why COCO and the motivation.
 

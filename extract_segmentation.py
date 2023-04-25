@@ -13,7 +13,7 @@ import torch.nn.functional as F
 # download deeplabv2_resnet101_msc-cocostuff164k-100000.pth from
 # https://github.com/kazuto1011/deeplab-pytorch/releases/download/v1.0/deeplabv2_resnet101_msc-cocostuff164k-100000.pth
 # and put the path here
-CKPT_PATH = "TODO"
+CKPT_PATH = "deeplabv2_resnet101_msc-cocostuff164k-100000.pth"
 
 rescale = lambda x: (x + 1.) / 2.
 
@@ -30,7 +30,7 @@ class COCOStuffSegmenter(nn.Module):
         self.n_labels = 182
         model = torch.hub.load("kazuto1011/deeplab-pytorch", "deeplabv2_resnet101", n_classes=self.n_labels)
         ckpt_path = CKPT_PATH
-        model.load_state_dict(torch.load(ckpt_path))
+        model.load_state_dict(torch.load(ckpt_path, map_location=torch.device('cpu')))
         self.model = model
 
         normalize = torchvision.transforms.Normalize(mean=self.mean, std=self.std)
@@ -97,7 +97,6 @@ def iterate_dataset(dataloader, destpath, model):
     for i, batch in tqdm(enumerate(dataloader), desc="Data"):
         try:
             img = get_input(batch, "image")
-            img = img.cuda()
             seg = run_model(img, model)
 
             path = batch["relative_file_path_"][0]
@@ -113,7 +112,7 @@ def iterate_dataset(dataloader, destpath, model):
     print("Processed {} files. Bye.".format(num_processed))
 
 
-from taming.data.sflckr import Examples
+from taming.data.coco import Examples
 from torch.utils.data import DataLoader
 
 if __name__ == "__main__":
@@ -121,7 +120,7 @@ if __name__ == "__main__":
     batchsize = 1
     print("Running with batch-size {}, saving to {}...".format(batchsize, dest))
 
-    model = COCOStuffSegmenter({}).cuda()
+    model = COCOStuffSegmenter({})
     print("Instantiated model.")
 
     dataset = Examples()
