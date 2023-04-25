@@ -1,7 +1,7 @@
 # Blog post for Deep Learning course
 
 ## Introduction
-In this blog, the convolutional VQGAN and its applications is explained. In 2021, P. Esser, R. Rombach, and B. Ommer combine transformers and CNNs to generate images, with the ability to add conditional synthesis tasks, such as segmentations, to control the generated image. Their results, at the time, obtained state of the art among autoregressive models on class-conditional ImageNet. Our hope for this blog is to provide the reader with a brief look into the combination of VQGANs and transformers, a from scratch PyTorch implementation of the VQGAN, and the application of the authors work to the Coco dataset as well as a dataset of atari environments (Montezuma's revenge).
+In this blog, the convolutional VQGAN and its applications is explained. In 2021, P. Esser, R. Rombach, and B. Ommer combine transformers and CNNs to generate images, with the ability to add conditional synthesis tasks, such as segmentations, to control the generated image. Their results, at the time, obtained state of the art among autoregressive models on class-conditional ImageNet. Our goal for this blog is to provide the reader with a brief look into the combination of VQGANs and transformers, a from scratch PyTorch implementation of the VQGAN, and the application of the authors work to the Coco dataset as well as a dataset of Atari environments (Montezuma's revenge).
 
 Our motivation for implementing this paper stems from its use in another paper we were originally interested in, namely "Transformers are sample-efficient world models" by V. Micheli, E. Alonso, F. Fleuret. The authors implement the VQGANs by Esser et. al. in their discrete autoencoder in a deep reinforcement learning agent that is data-efficient. We realised that we did not fully understand the mechanics behind the agent, which is why we ultimately decided to implement "Taming Transformers for High-Resolution Image Synthesis". Micheli et. al. implement this agent to Atari environments, hence why we chose Montezuma's revenge as a new dataset to apply the VQGANs to.
 
@@ -67,6 +67,7 @@ The code above is written in PyTorch, whereas the code on the github page was wr
 
 
 ## Running the Paper's VQGAN + Transformer on old data
+
 Explain how to run the original code on the old dataset. Also explain why COCO and the motivation.
 
 Show images generated.
