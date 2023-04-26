@@ -69,6 +69,7 @@ The code above is written in PyTorch, whereas the code on the github page was wr
 
 To verify the claims of the original paper, we decided to run multiple experiments on the COCO dataset which is also used by the authors.
 
+![alt text](res-table/res.svg)
 
 Explain how to run the original code on the old dataset. Also explain why COCO and the motivation.
 
