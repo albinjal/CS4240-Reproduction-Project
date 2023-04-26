@@ -69,7 +69,15 @@ The code above is written in PyTorch, whereas the code on the github page was wr
 
 To verify the claims of the original paper, we decided to run multiple experiments on the COCO dataset which is also used by the authors.
 
+
+We downloaded the [2021-01-20](https://k00.fr/2zz6i2ce) pre-trained COCO Transformer. The model has about 650 million parameters saved in an 8 GB checkpoint file.
+
+Even sampling from the model is very computationally intensive. Therefore, we also decided to modify the existing code to, in addition to CUDA, support MPS (MAC OS) GPUs. This speeds up the process significantly when running on Apple devices. We also updated some deprecated code.
+
+The COCO model presented by the authors allows conditioning the transformer on a depth segmentation map. The segmentations can be generated from regular images with [DeepLab v2](https://arxiv.org/abs/1606.00915) trained on [COCO-Stuff](https://arxiv.org/abs/1612.03716). To make things more interesting, we decided to capture some pictures of the TU Delft campus and generate segmentations on those using the [extract_segmentation.py](extract_segmentation.py) file. We then used the [sample_conditional.py](sample_conditional.py) file to run the model with different configurations and images.
+The figure below highlights a selection of our results. Explanations follow.
 ![alt text](res-table/res.svg)
+The figure above shows a selection of the results obtained when sampling from the pre-trained COCO transformer on custom images.
 
 Explain how to run the original code on the old dataset. Also explain why COCO and the motivation.
 
