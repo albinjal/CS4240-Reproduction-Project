@@ -103,11 +103,19 @@ Show images generated.
 
 
 ## Running the Paper's VQGAN + Transformer on new data
-Motivate why the Atari data.
+As mentioned at the start of the blog, we were first interested in applying a Deep Reinforcement Learning paper, which utilised this VQGAN to recreate world models of environments, specifically Atari environments. Our curiosity to whether or not this could indeed be done led us to testing the VQGAN on a custom dataset of the Atari game Montezuma's revenge, which is known to be one of the most difficult environments for Deep Reinforcement Learning agents to solve. We gathered this data from the following GitHub repository: "https://github.com/yobibyte/atarigrandchallenge".
 
-Show images generated.
+An example of an image from the game can be seen below (these are four appended game states).
+
+![Atari original](Images_blogpost/montezuma_original.png)
 
 
+After training, the VQGAN was able to reproduce the results quite well, and we take a look at the reproduced version of the image above.
+
+
+![Atari reconstructed](Images_blogpost/montezuma_reconstructed.png)
+
+As we can see, the images are pretty close to one another, missing out on only minor details, such as the skull not completely formed in the recreated images. We conclude that using VQGAN's for the recreation of Atari environments is quite feasible, even on the small amount of computing power that was available to us.
 
 ## FID Scores
 Add table for FID scores.
