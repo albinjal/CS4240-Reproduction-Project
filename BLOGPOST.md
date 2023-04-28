@@ -27,6 +27,13 @@ Finally to generate the images, the transformer is used in a sliding-window mann
 
 
 Now that we have a detailed overview of the overarching model, we look into the nitty-gritty details of the VQGAN.
+
+
+[here we add the computation bit, fix the sentence above]
+Training t
+
+
+
 ## Building the VQGAN from Scratch
 The VQGAN model is an autoencoder that utilizes vector quantization as a bottleneck between the encoder and decoder. This quantization technique has a similar effect to reducing the size of layers in the middle of a stacked autoencoder or by having the encoder output the sufficient statistics of a normal distribution and, sampling from this distribution, and feeding the sample to the decoder (as in a variational autoencoder). Quantization has an advantage over sampling in that it doesn't result in blurry output for the decoded image, unlike sampling which often produces blurry images.
 
