@@ -26,13 +26,15 @@ Finally to generate the images, the transformer is used in a sliding-window mann
 ![Sliding attention](Images_blogpost/sliding-attention.jpg)
 
 
+
+[comment]: <> (here we add the computation bit, fix the sentence above)
+
+Training both the transformer and VQGAN are very computationally expensive. Therefore, we ran our training on a Google Cloud VM with an NVIDIA T4 GPU. This was still not enough computational power to train on the more complex datasets, such as the COCO dataset, which resulted in some concessions that we had to make, detailed in their specific subsections.
+
+To evaluate how well we trained the models, we use FID scores, which the authors use as well in their paper. FID stands for Frechet inception distance, and this essentially measures the differences in distributions of the generated images against the distribution of the real images. We were not able to get FID scores for all the models, as there were issues with resolution sizes, which we could not solve in time.
+
+
 Now that we have a detailed overview of the overarching model, we look into the nitty-gritty details of the VQGAN.
-
-
-[here we add the computation bit, fix the sentence above]
-Training t
-
-
 
 ## Building the VQGAN from Scratch
 The VQGAN model is an autoencoder that utilizes vector quantization as a bottleneck between the encoder and decoder. This quantization technique has a similar effect to reducing the size of layers in the middle of a stacked autoencoder or by having the encoder output the sufficient statistics of a normal distribution and, sampling from this distribution, and feeding the sample to the decoder (as in a variational autoencoder). Quantization has an advantage over sampling in that it doesn't result in blurry output for the decoded image, unlike sampling which often produces blurry images.
@@ -87,21 +89,21 @@ Where $\mathcal{Z}$ is the codebook.
 
 Now, the quantized $z_{\mathbf{q}}$ does not have the gradients of $z$. To ensure that they do have the same gradient we use a trick that is referred to as the straight through estimator: `z_q = z + (z_q-z).detach() `. We keep the value of $z_q$ equal to its original value but it has the exact same gradients as $z$. This is because $z$ gets canceled by $(z_q-z)$,  however the gradient will not be canceled because of the `.detach()` method that was called on it.
 
-All in all, the VQGAN model is a powerful tool for generating high-quality images using vector quantization in the autoencoder architecture together with a discriminator.
-The code above is written in PyTorch, whereas the code on the paper author's GitHub page is written with Pytorch lightning so we also changed the framework.
+All in all, the VQGAN model is a powerful tool for generating high quality images using vector quantization in the autoencoder architecture together with a discriminator.
+The code above is written in PyTorch, whereas the code on the github page was written in pytorch lightning so we also changed the framework.
 
-As mentioned before, the entire VQGAN is written from scratch and is trained on the new data from Montezuma's revenge. Below you can see the results from the rewrite.
+As mentioned before, the entire VQGAN is written from scratch and is trained on the new data from montezuma's revenge. Below you can see the results from the rewrite.
 
 ![VQ_GAN_RESULTS](Images_blogpost/results_rewrite.jpg)
-The image reconstruction results are of lower fidelity than the VQGAN from the GitHub repository. This can either be due to one of the layers not being properly rewritten in the worst case, or can be due to hyperparameters not being properly configured in the best case. It is also possible that the perceptual loss, which comes from a pretrained resnet model is different in the rewrite than in the original github repository because of a different pretrained model being loaded in the original github repository than in the rewrite.
+The image reconstruction results are of lower fidelity than the VQGAN from the github repository. This can be either be due to one of the layers not being properly rewritten in the worst case, or can be due to hyperparameters not being properly configured in the best case. It is also possible that the perceptual loss, which comes from a pretrained resnet model is different in the rewrite than in the original github repository because of a different pretrained model being loaded in the original github repository than in the rewrite.
 
 Because of time constraints it wasn't possible for us to try to make the results of the rewrite of the same quality as the results of the github page.
 
-## Reproducing Results from the Original Paper
+## Running the Paper's VQGAN + Transformer on old data
 
 To verify the claims of the original paper, we decided to run multiple experiments on the [COCO](https://cocodataset.org/) dataset which is also used by the authors. The size of the training dataset is about 18 GB.
 
-### Inference
+
 We downloaded the [2021-01-20](https://k00.fr/2zz6i2ce) pre-trained COCO Transformer. The model has about 650 million parameters saved in an 8 GB checkpoint file.
 
 Even sampling from the model is very computationally intensive. Therefore, we also decided to modify the existing code to, in addition to CUDA, support MPS (MAC OS) GPUs. This speeds up the process significantly when running on Apple devices. We also updated some deprecated code.
@@ -111,8 +113,6 @@ The figure below highlights a selection of our results. Explanations follow.
 ![alt text](res-table/res.svg)
 The figure above shows a selection of results obtained when sampling from the pre-trained COCO transformer on custom images. The images are sampled at a resolution of $256\cdot256$ with $16\cdot16$ sliding attention window blocks. The first row contains the original images followed by the reproduction by the VQGAN. Preferably, the reproduction and the original is indistinguishable. As seen in the images, the results are similar but some details are lost, for example, the TU Delft sign is missing from the EEMCS building. The third row shows the segmentation generated by us that we condition on followed by the initial image. With the "Bottom Half" approach, we fix the top half of the image to the original and let the transformer generate only the bottom half. Lastly, we see a selection of 12 samples generated with the temperature hyperparameter varying from $0.5$ to $2$. As expected, the images generally get "more chaotic" as the temperature is increased. We estimate that the quality of the generated images is in line with the results from the original paper.
 
-### Training
-Training the transformer model on the COCO dataset from scratch is computationally intensive. We decided to train it on a Google Cloud VM with an NVIDIA T4 GPU. The original model that we wanted to train had almost one billion parameters but we noticed this what infeasible with our computational resources. We, therefore, reduced the number of layers and embedding dimensions to get a model with about 10 % of the original parameters.
 
 
 ## Running the Paper's VQGAN + Transformer on new data
