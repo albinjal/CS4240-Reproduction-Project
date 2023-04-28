@@ -1,6 +1,6 @@
 # CS4240 – Reproductions of Taming Transformers for High-Resolution Image Synthesis
 
-By **Group 22**: Albin Jaldevik, Avi Halevy (5175208), and Aadam Wiggers.
+By **Group 22**: Albin Jaldevik (5839408,R.a.jaldevik@student.tudelft.nl), Avi Halevy (5175208, A.L.Halevy@student.tudelft.nl), and Aadam Wiggers (5839408, Aagwiggers@student.tudelft.nl) .
 
 Primary tasks:
 - **Reproduced**: Existing code was evaluated. We conducted experiments with the COCO dataset, just like the authors.
@@ -38,8 +38,6 @@ Finally to generate the images, the transformer is used in a sliding-window mann
 [comment]: <> (here we add the computation bit, fix the sentence above)
 
 Training both the transformer and VQGAN are very computationally expensive. Therefore, we ran our training on a Google Cloud VM with an NVIDIA T4 GPU. This was still not enough computational power to train on the more complex datasets, such as the COCO dataset, which resulted in some concessions that we had to make, detailed in their specific subsections.
-
-To evaluate how well we trained the models, we use FID scores, which the authors use as well in their paper. FID stands for Frechet inception distance, and this essentially measures the differences in distributions of the generated images against the distribution of the real images. We were not able to get FID scores for all the models, as there were issues with resolution sizes, which we could not solve in time.
 
 
 Now that we have a detailed overview of the overarching model, we look into the nitty-gritty details of the VQGAN.
@@ -168,7 +166,7 @@ We relatively successfully recreated the VQGAN and have some results on the Atar
 
 The retraining of the full model on the COCO dataset was, relative to the author's results, quite unsuccessful, due to a lack of computational power to train on a bigger dataset. Despite this the pictures still look relatively reasonable all things considered. Using the pretrained weights of the authors, we get much better results, as can be seen from the recreated EEMCS and TU Delft Library pictures. We also showcase the model's ability for conditioning, using the segmentations of the pictures to get better overall results.
 
-The retraining on the Montezuma's revenge data was very successful. As we've seen, the recreations are quite good, and we have decent FID scores as well. This is probably due to the fact that the Atari environment dataset is much simpler than COCO, which resulted in a better ability for the model to learn the images with the amount of computational power we had.
+The retraining on the Montezuma's revenge data was very successful. As we've seen, the recreations are quite good. This is probably due to the fact that the Atari environment dataset is much simpler than COCO, which resulted in a better ability for the model to learn the images with the amount of computational power we had.
 
 In conclusion, we would consider that the author's came up with a very good model that can recreate and regenerate images quite well, especially when conditioning is utilised.
 
