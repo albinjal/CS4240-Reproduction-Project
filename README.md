@@ -1,6 +1,6 @@
 # CS4240 – Reproductions of Taming Transformers for High-Resolution Image Synthesis
 
-By **Group 22**: Albin Jaldevik, Avi Halevy, and Aadam Wiggers.
+By **Group 22**: Albin Jaldevik, Avi Halevy (5175208), and Aadam Wiggers.
 
 Primary tasks:
 - **Reproduced**: Existing code was evaluated. We conducted experiments with the COCO dataset, just like the authors.
