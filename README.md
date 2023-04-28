@@ -23,7 +23,8 @@ After the model is able to learn an effective codebook, i.e. $E$ (encoder) and $
 $$s_{ij} = k, \text{ s.t. } (z_{\mathbf{q}})_{ij} = z_k.$$
 
 The transformer learns to predict the distribution of possible next indices, $p(s_i|s_1, \dots, s_{i-1})$, which results in the following loss function we want to maximize:
-$$\mathcal{L}_{\text{Transformer}} = -\mathbb{E}_{x\sim p(x)}[\log p(s)].$$
+
+$$\mathcal{L}_{\text{Transformer}} = -\mathbb{E}_{x\sim p(x)}[\log p(s)]$$
 
 The beauty of this approach is that we can now add a condition $c$ to the probability distribution for which the transformer can learn from, i.e.
 $$p(s|c) = \prod_{i} p(s_i | s_1, \dots, s_{i-1}, c).$$
