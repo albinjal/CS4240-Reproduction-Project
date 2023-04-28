@@ -101,7 +101,23 @@ Because of time constraints it wasn't possible for us to try to make the results
 
 ## Running the Paper's VQGAN + Transformer on old data
 
-To verify the claims of the original paper, we decided to run multiple experiments on the [COCO](https://cocodataset.org/) dataset which is also used by the authors. The size of the training dataset is about 18 GB.
+To verify the claims of the original paper, we decided to run multiple experiments on the [COCO](https://cocodataset.org/) dataset which is also used by the authors. The size of the training dataset is about 18 GB. However, due to a lack of computational power, even with the Google VM, we had to "dumb" down the model by halving the number of layers as well as decreasing the number of embedded dimensions. Here we only train the transformer, and use pre-trained weights of the VQGAN. We do this as the authors main idea is this added transformer that learns the codebook and can better generate images. After training for 12 hours, we are left with some of the following images.
+
+This is the input image:
+
+![input coco](images_blogpost/inputs_gs-001695_e-000105_b-000000.png)
+
+This is the VQGAN recreation with the pretrained weights:
+
+![vqgan coco](images_blogpost/reconstructions_gs-001695_e-000105_b-000000.png)
+
+Now, we take a random generation from the transformer with no conditioning
+
+![coco transformer nocond](images_blogpost/samples_nopix_gs-001615_e-000100_b-000000.png)
+
+With taking a conditioning on half of the image, we get much better results, as can be seen below.
+
+![coco transformer cond](images_blogpost/samples_half_gs-001648_e-000103_b-000000.png)
 
 
 We downloaded the [2021-01-20](https://k00.fr/2zz6i2ce) pre-trained COCO Transformer. The model has about 650 million parameters saved in an 8 GB checkpoint file.
