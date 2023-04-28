@@ -176,5 +176,5 @@ In conclusion, we would consider that the author's came up with a very good mode
 ### Contributions
 All parties contributed equally and all helped with writing this blog post. Additionally:
 - Albin: Set up the GCP VM and ran the experiments + training on the COCO dataset.
-- Avi: Rewrote the VQGAN without Pytorch and trained it on the VM.
+- Avi: Rewrote the VQGAN without Pytorch lightning and trained it on the VM.
 - Aadam: Conducted the experiments on the Montezuma's revenge dataset.
