@@ -35,7 +35,7 @@ This condition can be anything; a single label, another image, or a segmentation
 
 Finally to generate the images, the transformer is used in a sliding-window manner, which can be seen in the figure below.
 
-![Sliding attention](Images_blogpost/sliding-attention.jpg)
+![Sliding attention](assets_blogpost/sliding-attention.jpg)
 
 
 
@@ -53,7 +53,7 @@ The VQGAN model is an autoencoder that utilizes vector quantization as a bottlen
 
 Below you can see a visualization of the VQGAN.
 
-![VQ_GAN](Images_blogpost/teaser.png)
+![VQ_GAN](assets_blogpost/teaser.png)
 
 The model consists of an encoder, a decoder, and a discriminator that differentiates real from fake images, making it a VQGAN rather than just a VQVAE. While the entire model was implemented from scratch, we will focus on a small segment of the code that handles vector quantization.
 ```python
@@ -106,7 +106,7 @@ The code above is written in PyTorch, whereas the code on the github page was wr
 
 As mentioned before, the entire VQGAN is written from scratch and is trained on the new data from montezuma's revenge. Below you can see the results from the rewrite.
 
-![VQ_GAN_RESULTS](Images_blogpost/results_rewrite.jpg)
+![VQ_GAN_RESULTS](assets_blogpost/results_rewrite.jpg)
 The image reconstruction results are of lower fidelity than the VQGAN from the github repository. This can be either be due to one of the layers not being properly rewritten in the worst case, or can be due to hyperparameters not being properly configured in the best case. It is also possible that the perceptual loss, which comes from a pretrained resnet model is different in the rewrite than in the original github repository because of a different pretrained model being loaded in the original github repository than in the rewrite.
 
 Because of time constraints it wasn't possible for us to try to make the results of the rewrite of the same quality as the results of the github page.
@@ -117,21 +117,21 @@ To verify the claims of the original paper, we decided to run multiple experimen
 
 This is the input image:
 
-![input coco](images_blogpost/inputs_gs-001695_e-000105_b-000000.png)
+![input coco](assets_blogpost/inputs_gs-001695_e-000105_b-000000.png)
 
 This is the VQGAN recreation with the pretrained weights:
 
-![vqgan coco](images_blogpost/reconstructions_gs-001695_e-000105_b-000000.png)
+![vqgan coco](assets_blogpost/reconstructions_gs-001695_e-000105_b-000000.png)
 
 We see that the recreations of the pretrained VQGAN is quite good. It obviously is not perfect, but beside small details, such as the cat's face, the VQGAN is able to recreate the "big picture" of the image.
 
 Now, we take a random generation from the transformer with no conditioning.
 
-![coco transformer nocond](images_blogpost/samples_nopix_gs-001615_e-000100_b-000000.png)
+![coco transformer nocond](assets_blogpost/samples_nopix_gs-001615_e-000100_b-000000.png)
 
 We see in the above pictures that our lack of computational power results in pretty badly generated images. On the right there is some semblance of houses with trees, and the left most some kind of forest, but in general these images are not that far from white noise. However, with taking a conditioning on half of the image, we get much better results, as can be seen below.
 
-![coco transformer cond](images_blogpost/samples_half_gs-001648_e-000103_b-000000.png)
+![coco transformer cond](assets_blogpost/samples_half_gs-001648_e-000103_b-000000.png)
 
 Conditioning on half the image results in the transformer to be able to generate a much better lower half. The food on the bottom half is clearly the same color and texture as the top half, and while the other images are not as good, they are at least the same color in most and have more comprehensible features. In order to get a better idea of the author's model, we take both the pre-trained transformer and pre-trained VQGAN and sample from custom photos.
 
@@ -154,13 +154,13 @@ As mentioned at the start of the blog, we were first interested in applying a De
 
 An example of an image from the game can be seen below (these are four appended game states).
 
-![Atari original](Images_blogpost/montezuma_original.png)
+![Atari original](assets_blogpost/montezuma_original.png)
 
 
 After training, the VQGAN was able to reproduce the results quite well, and we take a look at the reproduced version of the image above.
 
 
-![Atari reconstructed](Images_blogpost/montezuma_reconstructed.png)
+![Atari reconstructed](assets_blogpost/montezuma_reconstructed.png)
 
 As we can see, the images are pretty close to one another, missing out on only minor details, such as the skull not completely formed in the recreated images. We conclude that using VQGAN's for the recreation of Atari environments is quite feasible, even on the small amount of computing power that was available to us.
 
