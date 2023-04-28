@@ -83,6 +83,12 @@ Now, the quantized $z_{\mathbf{q}}$ does not have the gradients of $z$. To ensur
 All in all, the VQGAN model is a powerful tool for generating high quality images using vector quantization in the autoencoder architecture together with a discriminator.
 The code above is written in PyTorch, whereas the code on the github page was written in pytorch lightning so we also changed the framework.
 
+As mentioned before, the entire VQGAN is written from scratch and is trained on the new data from montezuma's revenge. Below you can see the results from the rewrite.
+
+![VQ_GAN_RESULTS](Images_blogpost/results_rewrite.jpg)
+The image reconstruction results are of lower fidelity than the VQGAN from the github repository. This can be either be due to one of the layers not being properly rewritten in the worst case, or can be due to hyperparameters not being properly configured in the best case. It is also possible that the perceptual loss, which comes from a pretrained resnet model is different in the rewrite than in the original github repository because of a different pretrained model being loaded in the original github repository than in the rewrite.
+
+Because of time constraints it wasn't possible for us to try to make the results of the rewrite of the same quality as the results of the github page.
 ## Running the Paper's VQGAN + Transformer on old data
 
 To verify the claims of the original paper, we decided to run multiple experiments on the [COCO](https://cocodataset.org/) dataset which is also used by the authors. The size of the training dataset is about 18 GB.
