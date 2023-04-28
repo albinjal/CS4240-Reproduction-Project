@@ -111,13 +111,17 @@ This is the VQGAN recreation with the pretrained weights:
 
 ![vqgan coco](images_blogpost/reconstructions_gs-001695_e-000105_b-000000.png)
 
-Now, we take a random generation from the transformer with no conditioning
+We see that the recreations of the pretrained VQGAN is quite good. It obviously is not perfect, but beside small details, such as the cat's face, the VQGAN is able to recreate the "big picture" of the image.
+
+Now, we take a random generation from the transformer with no conditioning.
 
 ![coco transformer nocond](images_blogpost/samples_nopix_gs-001615_e-000100_b-000000.png)
 
-With taking a conditioning on half of the image, we get much better results, as can be seen below.
+We see in the above pictures that our lack of computational power results in pretty badly generated images. On the right there is some semblance of houses with trees, and the left most some kind of forest, but in general these images are not that far from white noise. However, with taking a conditioning on half of the image, we get much better results, as can be seen below.
 
 ![coco transformer cond](images_blogpost/samples_half_gs-001648_e-000103_b-000000.png)
+
+Conditioning on half the image results in the transformer to be able to generate a much better lower half. The food on the bottom half is clearly the same color and texture as the top half, and while the other images are not as good, they are at least the same color in most and have more comprehensible features. In order to get a better idea of the author's model, we take both the pre-trained transformer and pre-trained VQGAN and sample from custom photos.
 
 
 We downloaded the [2021-01-20](https://k00.fr/2zz6i2ce) pre-trained COCO Transformer. The model has about 650 million parameters saved in an 8 GB checkpoint file.
