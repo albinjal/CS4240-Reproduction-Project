@@ -1,410 +1,177 @@
-# Taming Transformers for High-Resolution Image Synthesis
-##### CVPR 2021 (Oral)
-![teaser](assets/mountain.jpeg)
+# CS4240 – Reproductions of Taming Transformers for High-Resolution Image Synthesis
 
-[**Taming Transformers for High-Resolution Image Synthesis**](https://compvis.github.io/taming-transformers/)<br/>
-[Patrick Esser](https://github.com/pesser)\*,
-[Robin Rombach](https://github.com/rromb)\*,
-[Björn Ommer](https://hci.iwr.uni-heidelberg.de/Staff/bommer)<br/>
-\* equal contribution
+By **Group 22**: Albin Jaldevik, Avi Halevy, and Aadam Wiggers.
 
-**tl;dr** We combine the efficiancy of convolutional approaches with the expressivity of transformers by introducing a convolutional VQGAN, which learns a codebook of context-rich visual parts, whose composition is modeled with an autoregressive transformer.
-
-![teaser](assets/teaser.png)
-[arXiv](https://arxiv.org/abs/2012.09841) | [BibTeX](#bibtex) | [Project Page](https://compvis.github.io/taming-transformers/)
+Primary tasks:
+- **Reproduced**: Existing code was evaluated. We conducted experiments with the COCO dataset, just like the authors.
+- **New data**: Evaluating different datasets to obtain similar results. We trained the model on images from Montezuma's revenge.
+- **New code variant**: Rewrote or ported existing code to be more efficient/readable. We ported the full VQGAN to pure Pytorch. See [VQ_GAN2.ipynb](VQ_GAN2.ipynb).
 
 
-### News
-#### 2022
-- More pretrained VQGANs (e.g. a f8-model with only 256 codebook entries) are available in our new work on [Latent Diffusion Models](https://github.com/CompVis/latent-diffusion).
-- Added scene synthesis models as proposed in the paper [High-Resolution Complex Scene Synthesis with Transformers](https://arxiv.org/abs/2105.06458), see [this section](#scene-image-synthesis).
-#### 2021
-- Thanks to [rom1504](https://github.com/rom1504) it is now easy to [train a VQGAN on your own datasets](#training-on-custom-data).
-- Included a bugfix for the quantizer. For backward compatibility it is
-  disabled by default (which corresponds to always training with `beta=1.0`).
-  Use `legacy=False` in the quantizer config to enable it.
-  Thanks [richcmwang](https://github.com/richcmwang) and [wcshin-git](https://github.com/wcshin-git)!
-- Our paper received an update: See https://arxiv.org/abs/2012.09841v3 and the corresponding changelog.
-- Added a pretrained, [1.4B transformer model](https://k00.fr/s511rwcv) trained for class-conditional ImageNet synthesis, which obtains state-of-the-art FID scores among autoregressive approaches and outperforms BigGAN.
-- Added pretrained, unconditional models on [FFHQ](https://k00.fr/yndvfu95) and [CelebA-HQ](https://k00.fr/2xkmielf).
-- Added accelerated sampling via caching of keys/values in the self-attention operation, used in `scripts/sample_fast.py`.
-- Added a checkpoint of a [VQGAN](https://heibox.uni-heidelberg.de/d/2e5662443a6b4307b470/) trained with f8 compression and Gumbel-Quantization. 
-  See also our updated [reconstruction notebook](https://colab.research.google.com/github/CompVis/taming-transformers/blob/master/scripts/reconstruction_usage.ipynb). 
-- We added a [colab notebook](https://colab.research.google.com/github/CompVis/taming-transformers/blob/master/scripts/reconstruction_usage.ipynb) which compares two VQGANs and OpenAI's [DALL-E](https://github.com/openai/DALL-E). See also [this section](#more-resources).
-- We now include an overview of pretrained models in [Tab.1](#overview-of-pretrained-models). We added models for [COCO](#coco) and [ADE20k](#ade20k).
-- The streamlit demo now supports image completions.
-- We now include a couple of examples from the D-RIN dataset so you can run the
-  [D-RIN demo](#d-rin) without preparing the dataset first.
-- You can now jump right into sampling with our [Colab quickstart notebook](https://colab.research.google.com/github/CompVis/taming-transformers/blob/master/scripts/taming-transformers.ipynb).
-
-## Requirements
-A suitable [conda](https://conda.io/) environment named `taming` can be created
-and activated with:
-
-```
-conda env create -f environment.yaml
-conda activate taming
-```
-## Overview of pretrained models
-The following table provides an overview of all models that are currently available. 
-FID scores were evaluated using [torch-fidelity](https://github.com/toshas/torch-fidelity).
-For reference, we also include a link to the recently released autoencoder of the [DALL-E](https://github.com/openai/DALL-E) model. 
-See the corresponding [colab
-notebook](https://colab.research.google.com/github/CompVis/taming-transformers/blob/master/scripts/reconstruction_usage.ipynb)
-for a comparison and discussion of reconstruction capabilities.
-
-| Dataset  | FID vs train | FID vs val | Link |  Samples (256x256) | Comments
-| ------------- | ------------- | ------------- |-------------  | -------------  |-------------  |
-| FFHQ (f=16) | 9.6 | -- | [ffhq_transformer](https://k00.fr/yndvfu95) |  [ffhq_samples](https://k00.fr/j626x093) |
-| CelebA-HQ (f=16) | 10.2 | -- | [celebahq_transformer](https://k00.fr/2xkmielf) | [celebahq_samples](https://k00.fr/j626x093) |
-| ADE20K (f=16) | -- | 35.5 | [ade20k_transformer](https://k00.fr/ot46cksa) | [ade20k_samples.zip](https://heibox.uni-heidelberg.de/f/70bb78cbaf844501b8fb/) [2k] | evaluated on val split (2k images)
-| COCO-Stuff (f=16) | -- | 20.4  | [coco_transformer](https://k00.fr/2zz6i2ce) | [coco_samples.zip](https://heibox.uni-heidelberg.de/f/a395a9be612f4a7a8054/) [5k] | evaluated on val split (5k images)
-| ImageNet (cIN) (f=16) | 15.98/15.78/6.59/5.88/5.20 | -- | [cin_transformer](https://k00.fr/s511rwcv) | [cin_samples](https://k00.fr/j626x093) | different decoding hyperparameters |  
-| |  | | || |
-| FacesHQ (f=16) | -- |  -- | [faceshq_transformer](https://k00.fr/qqfl2do8)
-| S-FLCKR (f=16) | -- | -- | [sflckr](https://heibox.uni-heidelberg.de/d/73487ab6e5314cb5adba/) 
-| D-RIN (f=16) | -- | -- | [drin_transformer](https://k00.fr/39jcugc5)
-| | |  | | || |
-| VQGAN ImageNet (f=16), 1024 |  10.54 | 7.94 | [vqgan_imagenet_f16_1024](https://heibox.uni-heidelberg.de/d/8088892a516d4e3baf92/) | [reconstructions](https://k00.fr/j626x093) | Reconstruction-FIDs.
-| VQGAN ImageNet (f=16), 16384 | 7.41 | 4.98 |[vqgan_imagenet_f16_16384](https://heibox.uni-heidelberg.de/d/a7530b09fed84f80a887/)  |  [reconstructions](https://k00.fr/j626x093) | Reconstruction-FIDs.
-| VQGAN OpenImages (f=8), 256 | -- | 1.49 |https://ommer-lab.com/files/latent-diffusion/vq-f8-n256.zip |  ---  | Reconstruction-FIDs. Available via [latent diffusion](https://github.com/CompVis/latent-diffusion).
-| VQGAN OpenImages (f=8), 16384 | -- | 1.14 |https://ommer-lab.com/files/latent-diffusion/vq-f8.zip  |  ---  | Reconstruction-FIDs. Available via [latent diffusion](https://github.com/CompVis/latent-diffusion)
-| VQGAN OpenImages (f=8), 8192, GumbelQuantization | 3.24 | 1.49 |[vqgan_gumbel_f8](https://heibox.uni-heidelberg.de/d/2e5662443a6b4307b470/)  |  ---  | Reconstruction-FIDs.
-| | |  | | || |
-| DALL-E dVAE (f=8), 8192, GumbelQuantization | 33.88 | 32.01 | https://github.com/openai/DALL-E | [reconstructions](https://k00.fr/j626x093) | Reconstruction-FIDs.
+[Original paper](https://openaccess.thecvf.com/content/CVPR2021/html/Esser_Taming_Transformers_for_High-Resolution_Image_Synthesis_CVPR_2021_paper.html?ref=https://githubhelp.com)
 
 
-## Running pretrained models
 
-The commands below will start a streamlit demo which supports sampling at
-different resolutions and image completions. To run a non-interactive version
-of the sampling process, replace `streamlit run scripts/sample_conditional.py --`
-by `python scripts/make_samples.py --outdir <path_to_write_samples_to>` and
-keep the remaining command line arguments. 
+## Introduction
+In this blog, the mix of transformers with convolutional VQGAN and its applications are explained. In 2021, P. Esser, R. Rombach, and B. Ommer combine transformers and CNNs to generate images, with the ability to add conditional synthesis tasks, such as segmentations, to control the generated image. Their results, at the time, obtained state of the art among autoregressive models on class-conditional ImageNet. Our goal for this blog is to provide the reader with a brief look into the combination of VQGANs and transformers, a from scratch PyTorch implementation of the VQGAN, retraining of the original models, and the application of the authors work to a dataset of Atari environments (Montezuma's revenge).
 
-To sample from unconditional or class-conditional models, 
-run `python scripts/sample_fast.py -r <path/to/config_and_checkpoint>`.
-We describe below how to use this script to sample from the ImageNet, FFHQ, and CelebA-HQ models, 
-respectively.
+Our motivation for implementing this paper stems from its use in another paper we were originally interested in, namely "Transformers are sample-efficient world models" by V. Micheli, E. Alonso, F. Fleuret. The authors implement the VQGANs by Esser et. al. in their discrete autoencoder in a deep reinforcement learning agent that is data-efficient. We realised that we did not fully understand the mechanics behind the agent, which is why we ultimately decided to implement "Taming Transformers for High-Resolution Image Synthesis". Micheli et. al. implement this agent to Atari environments, hence why we chose Montezuma's revenge as a new dataset to apply the VQGANs to.
 
-### S-FLCKR
-![teaser](assets/sunset_and_ocean.jpg)
+[comment]: <> (In this paragraph we explain the paper shortly -> what it does and tries to achieve.)
 
-You can also [run this model in a Colab
-notebook](https://colab.research.google.com/github/CompVis/taming-transformers/blob/master/scripts/taming-transformers.ipynb),
-which includes all necessary steps to start sampling.
+The author's state their goal as follows: "...to exploit the highly promising learning capabilities of transformer models and introduce them to high-resolution image synthesis...". They split their approach into 2 parts, namely: learning an effective codebook of image constituents for use in transformers, and learning the composition of images with transformers. The idea is to feed the transformer model with a codebook that represents the image, instead of the pixels that represent the image. This results in significant reductions of the description length of compositions, allowing the transformers to understand the global composition of images, and generate realistic high resolution images. We now go over these two parts and explain these more in-depth.
 
-Download the
-[2020-11-09T13-31-51_sflckr](https://heibox.uni-heidelberg.de/d/73487ab6e5314cb5adba/)
-folder and place it into `logs`. Then, run
-```
-streamlit run scripts/sample_conditional.py -- -r logs/2020-11-09T13-31-51_sflckr/
+To learn an effective codebook, we first need to express the constituents of an image in the form of a sequence. This is because the transformer's architecture is a lot more suitable for this kind of data structure, and thus can be utilized better. To do so, the authors utilize discrete codebooks to represent images. By definition, a discrete codebook is a collection of codebook entries, $z_{\mathbf{q}} \in \mathbb{R}^{h \times w \times n_z}$, where $n_z$ is the dimensionality of codes. A more in depth explanation of what happens next with encoders, decoders and the VQGAN itself will be explained in the following section, where we build the VQGAN from scratch.
+
+After the model is able to learn an effective codebook, i.e. $E$ (encoder) and $G$ (decoder) are available, we can train a transformer on the quantized encoding $z_{\mathbf{q}}$ of the image $x$. Notice that this is equivalent to a sequence $s \in \{0, \dots, |\mathcal{Z}-1|\}^{h\times w}$ of indices from the codebook, i.e.
+$$s_{ij} = k, \text{ s.t. } (z_{\mathbf{q}})_{ij} = z_k.$$
+
+The transformer learns to predict the distribution of possible next indices, $p(s_i|s_1, \dots, s_{i-1})$, which results in the following loss function we want to maximize:
+$$\mathcal{L}_{\text{Transformer}} = -\mathbb{E}_{x\sim p(x)}[\log p(s)].$$
+
+The beauty of this approach is that we can now add a condition $c$ to the probability distribution for which the transformer can learn from, i.e.
+$$p(s|c) = \prod_{i} p(s_i | s_1, \dots, s_{i-1}, c).$$
+This condition can be anything; a single label, another image, or a segmentation of an image, etc.
+
+Finally to generate the images, the transformer is used in a sliding-window manner, which can be seen in the figure below.
+
+![Sliding attention](Images_blogpost/sliding-attention.jpg)
+
+
+
+[comment]: <> (here we add the computation bit, fix the sentence above)
+
+Training both the transformer and VQGAN are very computationally expensive. Therefore, we ran our training on a Google Cloud VM with an NVIDIA T4 GPU. This was still not enough computational power to train on the more complex datasets, such as the COCO dataset, which resulted in some concessions that we had to make, detailed in their specific subsections.
+
+To evaluate how well we trained the models, we use FID scores, which the authors use as well in their paper. FID stands for Frechet inception distance, and this essentially measures the differences in distributions of the generated images against the distribution of the real images. We were not able to get FID scores for all the models, as there were issues with resolution sizes, which we could not solve in time.
+
+
+Now that we have a detailed overview of the overarching model, we look into the nitty-gritty details of the VQGAN.
+
+## Building the VQGAN from Scratch
+The VQGAN model is an autoencoder that utilizes vector quantization as a bottleneck between the encoder and decoder. This quantization technique has a similar effect to reducing the size of layers in the middle of a stacked autoencoder or by having the encoder output the sufficient statistics of a normal distribution and, sampling from this distribution, and feeding the sample to the decoder (as in a variational autoencoder). Quantization has an advantage over sampling in that it doesn't result in blurry output for the decoded image, unlike sampling which often produces blurry images.
+
+Below you can see a visualization of the VQGAN.
+
+![VQ_GAN](Images_blogpost/teaser.png)
+
+The model consists of an encoder, a decoder, and a discriminator that differentiates real from fake images, making it a VQGAN rather than just a VQVAE. While the entire model was implemented from scratch, we will focus on a small segment of the code that handles vector quantization.
+```python
+class Codebook(nn.Module):
+    def __init__(self,args):
+        super(Codebook,self).__init__()
+        self.num_codebook_vectors = args.num_codebook_vectors
+        self.latent_dim = args.latent_dim
+        self.beta = args.beta
+
+        self.embedding = nn.Embedding(self.num_codebook_vectors,self.latent_dim) # matrix with as rows the different embedding vectors
+
+        # takes as input tensor with indices, output will be a tensor containing all the requested embedding vectors that corr with the indices
+        self.embedding.weight.data.uniform_(-1.0/self.num_codebook_vectors,1.0/self.num_codebook_vectors) #the learnable weights of the module of shape (num_embeddings, embedding_dim) initialized uniformly now
+
+    def forward(self,z):
+        # z is normally of shape (batch_size,channels,height, width), after permutation its (batch_size, height,width,channels)
+        z = z.permute(0,2,3,1).contiguous() # prepending latent vectors for finding the minimal distance to the codebook vectors
+        z_flattened = z.view(-1,self.latent_dim)
+
+        d = torch.sum(z_flattened**2,dim=1,keepdim=True)+\
+            torch.sum(self.embedding.weight**2, dim=1)-\
+            2*(torch.matmul(z_flattened,self.embedding.weight.t()))
+
+        min_enc_indices = torch.argmin(d,dim=1)
+        z_q = self.embedding(min_enc_indices).view(z.shape)
+        loss = torch.mean((z_q.detach()-z)**2)+ self.beta * torch.mean((z_q-z.detach())**2)
+        # above we first remove the gradient from the quantized latent vectors from the gradient flow and substract it from the original latent vector
+        # in the second part we remove tha gradient from the original latent vector and keep the one of the quantized latent vector and substract them
+
+        z_q = z + (z_q-z).detach() # here we make sure that z_q has the gradient of z but keeps its quantized value
+        z_q = z_q.permute(0,3,1,2)
+
+        return z_q, min_enc_indices, loss
 ```
 
-### ImageNet
-![teaser](assets/imagenet.png)
+Here we construct a Codebook class with `self.num_codebook_vectors` number of codebook vectors. Each having dimension `self.latent_dim`.
+The codebook vectors are stored in a `nn.Embedding` layer, with `self.num_codebook_vectors` number of embeddings each of size `self.latent_dim`.
 
-Download the [2021-04-03T19-39-50_cin_transformer](https://k00.fr/s511rwcv)
-folder and place it into logs.  Sampling from the class-conditional ImageNet
-model does not require any data preparation. To produce 50 samples for each of
-the 1000 classes of ImageNet, with k=600 for top-k sampling, p=0.92 for nucleus
-sampling and temperature t=1.0, run
+In the forward function we see that we start with a $z$ with dimension $[N,H,W,C]$, where $N$ is the batch size $H$ is the height of the image $W$ is the width of the image and $C$ is the number of channels in of the image. Which we then permute and reshape to get a $z_{flattened}$ which has the shape of $[N\cdot H \cdot W,C]$. We then calculate the euclidean distance of $z_{flattened}$ to every codebook vector and store these distances in $d$. After which we calculate the indices corresponding to the smallest distances, and store the result in `min_enc_indices`. The quantized latent vectors $z_q$ are then obtained through indexing the codebook with `self.embedding(min_enc_indices)`.
 
-```
-python scripts/sample_fast.py -r logs/2021-04-03T19-39-50_cin_transformer/ -n 50 -k 600 -t 1.0 -p 0.92 --batch_size 25   
-```
+To relate what has happened up to this point to the image shown before, putting the code into more mathematical terms we've done the following:
+$$z_{\mathbf{q}} = \arg \min_{z_i \in \mathcal{Z}} ||\hat{z}-z||$$
+Where $\mathcal{Z}$ is the codebook.
 
-To restrict the model to certain classes, provide them via the `--classes` argument, separated by 
-commas. For example, to sample 50 *ostriches*, *border collies* and *whiskey jugs*, run
+Now, the quantized $z_{\mathbf{q}}$ does not have the gradients of $z$. To ensure that they do have the same gradient we use a trick that is referred to as the straight through estimator: `z_q = z + (z_q-z).detach() `. We keep the value of $z_q$ equal to its original value but it has the exact same gradients as $z$. This is because $z$ gets canceled by $(z_q-z)$,  however the gradient will not be canceled because of the `.detach()` method that was called on it.
 
-```
-python scripts/sample_fast.py -r logs/2021-04-03T19-39-50_cin_transformer/ -n 50 -k 600 -t 1.0 -p 0.92 --batch_size 25 --classes 9,232,901   
-```
-We recommended to experiment with the autoregressive decoding parameters (top-k, top-p and temperature) for best results.  
+All in all, the VQGAN model is a powerful tool for generating high quality images using vector quantization in the autoencoder architecture together with a discriminator.
+The code above is written in PyTorch, whereas the code on the github page was written in pytorch lightning so we also changed the framework.
 
-### FFHQ/CelebA-HQ
+As mentioned before, the entire VQGAN is written from scratch and is trained on the new data from montezuma's revenge. Below you can see the results from the rewrite.
 
-Download the [2021-04-23T18-19-01_ffhq_transformer](https://k00.fr/yndvfu95) and 
-[2021-04-23T18-11-19_celebahq_transformer](https://k00.fr/2xkmielf) 
-folders and place them into logs. 
-Again, sampling from these unconditional models does not require any data preparation.
-To produce 50000 samples, with k=250 for top-k sampling,
-p=1.0 for nucleus sampling and temperature t=1.0, run
+![VQ_GAN_RESULTS](Images_blogpost/results_rewrite.jpg)
+The image reconstruction results are of lower fidelity than the VQGAN from the github repository. This can be either be due to one of the layers not being properly rewritten in the worst case, or can be due to hyperparameters not being properly configured in the best case. It is also possible that the perceptual loss, which comes from a pretrained resnet model is different in the rewrite than in the original github repository because of a different pretrained model being loaded in the original github repository than in the rewrite.
 
-```
-python scripts/sample_fast.py -r logs/2021-04-23T18-19-01_ffhq_transformer/   
-```
-for FFHQ and  
+Because of time constraints it wasn't possible for us to try to make the results of the rewrite of the same quality as the results of the github page.
 
-```
-python scripts/sample_fast.py -r logs/2021-04-23T18-11-19_celebahq_transformer/   
-```
-to sample from the CelebA-HQ model.
-For both models it can be advantageous to vary the top-k/top-p parameters for sampling.
+## Running the Paper's VQGAN + Transformer on old data
 
-### FacesHQ
-![teaser](assets/faceshq.jpg)
+To verify the claims of the original paper, we decided to run multiple experiments on the [COCO](https://cocodataset.org/) dataset which is also used by the authors. The size of the training dataset is about 18 GB. However, due to a lack of computational power, even with the Google VM, we had to "dumb" down the model by halving the number of layers as well as decreasing the number of embedded dimensions. Here we only train the transformer, and use pre-trained weights of the VQGAN. We do this as the authors main idea is this added transformer that learns the codebook and can better generate images. After training for 12 hours, we are left with some of the following images.
 
-Download [2020-11-13T21-41-45_faceshq_transformer](https://k00.fr/qqfl2do8) and
-place it into `logs`. Follow the data preparation steps for
-[CelebA-HQ](#celeba-hq) and [FFHQ](#ffhq). Run
-```
-streamlit run scripts/sample_conditional.py -- -r logs/2020-11-13T21-41-45_faceshq_transformer/
-```
+This is the input image:
 
-### D-RIN
-![teaser](assets/drin.jpg)
+![input coco](images_blogpost/inputs_gs-001695_e-000105_b-000000.png)
 
-Download [2020-11-20T12-54-32_drin_transformer](https://k00.fr/39jcugc5) and
-place it into `logs`. To run the demo on a couple of example depth maps
-included in the repository, run
+This is the VQGAN recreation with the pretrained weights:
 
-```
-streamlit run scripts/sample_conditional.py -- -r logs/2020-11-20T12-54-32_drin_transformer/ --ignore_base_data data="{target: main.DataModuleFromConfig, params: {batch_size: 1, validation: {target: taming.data.imagenet.DRINExamples}}}"
-```
+![vqgan coco](images_blogpost/reconstructions_gs-001695_e-000105_b-000000.png)
 
-To run the demo on the complete validation set, first follow the data preparation steps for
-[ImageNet](#imagenet) and then run
-```
-streamlit run scripts/sample_conditional.py -- -r logs/2020-11-20T12-54-32_drin_transformer/
-```
+We see that the recreations of the pretrained VQGAN is quite good. It obviously is not perfect, but beside small details, such as the cat's face, the VQGAN is able to recreate the "big picture" of the image.
 
-### COCO
-Download [2021-01-20T16-04-20_coco_transformer](https://k00.fr/2zz6i2ce) and
-place it into `logs`. To run the demo on a couple of example segmentation maps
-included in the repository, run
+Now, we take a random generation from the transformer with no conditioning.
 
-```
-streamlit run scripts/sample_conditional.py -- -r logs/2021-01-20T16-04-20_coco_transformer/ --ignore_base_data data="{target: main.DataModuleFromConfig, params: {batch_size: 1, validation: {target: taming.data.coco.Examples}}}"
-```
+![coco transformer nocond](images_blogpost/samples_nopix_gs-001615_e-000100_b-000000.png)
 
-### ADE20k
-Download [2020-11-20T21-45-44_ade20k_transformer](https://k00.fr/ot46cksa) and
-place it into `logs`. To run the demo on a couple of example segmentation maps
-included in the repository, run
+We see in the above pictures that our lack of computational power results in pretty badly generated images. On the right there is some semblance of houses with trees, and the left most some kind of forest, but in general these images are not that far from white noise. However, with taking a conditioning on half of the image, we get much better results, as can be seen below.
 
-```
-streamlit run scripts/sample_conditional.py -- -r logs/2020-11-20T21-45-44_ade20k_transformer/ --ignore_base_data data="{target: main.DataModuleFromConfig, params: {batch_size: 1, validation: {target: taming.data.ade20k.Examples}}}"
-```
+![coco transformer cond](images_blogpost/samples_half_gs-001648_e-000103_b-000000.png)
 
-## Scene Image Synthesis
-![teaser](assets/scene_images_samples.svg)
-Scene image generation based on bounding box conditionals as done in our CVPR2021 AI4CC workshop paper [High-Resolution Complex Scene Synthesis with Transformers](https://arxiv.org/abs/2105.06458) (see talk on [workshop page](https://visual.cs.brown.edu/workshops/aicc2021/#awards)). Supporting the datasets COCO and Open Images.
-
-### Training
-Download first-stage models [COCO-8k-VQGAN](https://heibox.uni-heidelberg.de/f/78dea9589974474c97c1/) for COCO or [COCO/Open-Images-8k-VQGAN](https://heibox.uni-heidelberg.de/f/461d9a9f4fcf48ab84f4/) for Open Images.
-Change `ckpt_path` in `data/coco_scene_images_transformer.yaml` and `data/open_images_scene_images_transformer.yaml` to point to the downloaded first-stage models.
-Download the full COCO/OI datasets and adapt `data_path` in the same files, unless working with the 100 files provided for training and validation suits your needs already.
-
-Code can be run with
-`python main.py --base configs/coco_scene_images_transformer.yaml -t True --gpus 0,`
-or
-`python main.py --base configs/open_images_scene_images_transformer.yaml -t True --gpus 0,`
-
-### Sampling 
-Train a model as described above or download a pre-trained model:
- - [Open Images 1 billion parameter model](https://drive.google.com/file/d/1FEK-Z7hyWJBvFWQF50pzSK9y1W_CJEig/view?usp=sharing) available that trained 100 epochs. On 256x256 pixels, FID 41.48±0.21, SceneFID 14.60±0.15, Inception Score 18.47±0.27. The model was trained with 2d crops of images and is thus well-prepared for the task of generating high-resolution images, e.g. 512x512.
- - [Open Images distilled version of the above model with 125 million parameters](https://drive.google.com/file/d/1xf89g0mc78J3d8Bx5YhbK4tNRNlOoYaO) allows for sampling on smaller GPUs (4 GB is enough for sampling 256x256 px images). Model was trained for 60 epochs with 10% soft loss, 90% hard loss. On 256x256 pixels, FID 43.07±0.40, SceneFID 15.93±0.19, Inception Score 17.23±0.11.
- - [COCO 30 epochs](https://heibox.uni-heidelberg.de/f/0d0b2594e9074c7e9a33/)
- - [COCO 60 epochs](https://drive.google.com/file/d/1bInd49g2YulTJBjU32Awyt5qnzxxG5U9/) (find model statistics for both COCO versions in `assets/coco_scene_images_training.svg`)
-
-When downloading a pre-trained model, remember to change `ckpt_path` in `configs/*project.yaml` to point to your downloaded first-stage model (see ->Training).
-
-Scene image generation can be run with
-`python scripts/make_scene_samples.py --outdir=/some/outdir -r /path/to/pretrained/model --resolution=512,512`
+Conditioning on half the image results in the transformer to be able to generate a much better lower half. The food on the bottom half is clearly the same color and texture as the top half, and while the other images are not as good, they are at least the same color in most and have more comprehensible features. In order to get a better idea of the author's model, we take both the pre-trained transformer and pre-trained VQGAN and sample from custom photos.
 
 
-## Training on custom data
+We downloaded the [2021-01-20](https://k00.fr/2zz6i2ce) pre-trained COCO Transformer. The model has about 650 million parameters saved in an 8 GB checkpoint file.
 
-Training on your own dataset can be beneficial to get better tokens and hence better images for your domain.
-Those are the steps to follow to make this work:
-1. install the repo with `conda env create -f environment.yaml`, `conda activate taming` and `pip install -e .`
-1. put your .jpg files in a folder `your_folder`
-2. create 2 text files a `xx_train.txt` and `xx_test.txt` that point to the files in your training and test set respectively (for example `find $(pwd)/your_folder -name "*.jpg" > train.txt`)
-3. adapt `configs/custom_vqgan.yaml` to point to these 2 files
-4. run `python main.py --base configs/custom_vqgan.yaml -t True --gpus 0,1` to
-   train on two GPUs. Use `--gpus 0,` (with a trailing comma) to train on a single GPU.
+Even sampling from the model is very computationally intensive. Therefore, we also decided to modify the existing code to, in addition to CUDA, support MPS (MAC OS) GPUs. This speeds up the process significantly when running on Apple devices. We also updated some deprecated code.
 
-## Data Preparation
+The COCO model presented by the authors allows conditioning the transformer on a depth segmentation map. The segmentations can be generated from regular images with [DeepLab v2](https://arxiv.org/abs/1606.00915) trained on [COCO-Stuff](https://arxiv.org/abs/1612.03716). To make things more interesting, we decided to capture some pictures of the TU Delft campus and generate segmentations on those using the [extract_segmentation.py](extract_segmentation.py) file. We then used the [sample_conditional.py](sample_conditional.py) file to run the model with different configurations and images.
+The figure below highlights a selection of our results. Explanations follow.
 
-### ImageNet
-The code will try to download (through [Academic
-Torrents](http://academictorrents.com/)) and prepare ImageNet the first time it
-is used. However, since ImageNet is quite large, this requires a lot of disk
-space and time. If you already have ImageNet on your disk, you can speed things
-up by putting the data into
-`${XDG_CACHE}/autoencoders/data/ILSVRC2012_{split}/data/` (which defaults to
-`~/.cache/autoencoders/data/ILSVRC2012_{split}/data/`), where `{split}` is one
-of `train`/`validation`. It should have the following structure:
+![alt text](res-table/res.svg)
 
-```
-${XDG_CACHE}/autoencoders/data/ILSVRC2012_{split}/data/
-├── n01440764
-│   ├── n01440764_10026.JPEG
-│   ├── n01440764_10027.JPEG
-│   ├── ...
-├── n01443537
-│   ├── n01443537_10007.JPEG
-│   ├── n01443537_10014.JPEG
-│   ├── ...
-├── ...
-```
+The figure above shows a selection of results obtained when sampling from the pre-trained COCO transformer on custom images. The images are sampled at a resolution of $256\cdot256$ with $16\cdot16$ sliding attention window blocks. The first row contains the original images followed by the reproduction by the VQGAN. Preferably, the reproduction and the original is indistinguishable. As seen in the images, the results are similar but some details are lost, for example, the TU Delft sign is missing from the EEMCS building. The third row shows the segmentation generated by us that we condition on followed by the initial image. With the "Bottom Half" approach, we fix the top half of the image to the original and let the transformer generate only the bottom half. Lastly, we see a selection of 12 samples generated with the temperature hyperparameter varying from $0.5$ to $2$. As expected, the images generally get "more chaotic" as the temperature is increased. We estimate that the quality of the generated images is in line with the results from the original paper.
 
-If you haven't extracted the data, you can also place
-`ILSVRC2012_img_train.tar`/`ILSVRC2012_img_val.tar` (or symlinks to them) into
-`${XDG_CACHE}/autoencoders/data/ILSVRC2012_train/` /
-`${XDG_CACHE}/autoencoders/data/ILSVRC2012_validation/`, which will then be
-extracted into above structure without downloading it again.  Note that this
-will only happen if neither a folder
-`${XDG_CACHE}/autoencoders/data/ILSVRC2012_{split}/data/` nor a file
-`${XDG_CACHE}/autoencoders/data/ILSVRC2012_{split}/.ready` exist. Remove them
-if you want to force running the dataset preparation again.
 
-You will then need to prepare the depth data using
-[MiDaS](https://github.com/intel-isl/MiDaS). Create a symlink
-`data/imagenet_depth` pointing to a folder with two subfolders `train` and
-`val`, each mirroring the structure of the corresponding ImageNet folder
-described above and containing a `png` file for each of ImageNet's `JPEG`
-files. The `png` encodes `float32` depth values obtained from MiDaS as RGBA
-images. We provide the script `scripts/extract_depth.py` to generate this data.
-**Please note** that this script uses [MiDaS via PyTorch
-Hub](https://pytorch.org/hub/intelisl_midas_v2/). When we prepared the data,
-the hub provided the [MiDaS
-v2.0](https://github.com/intel-isl/MiDaS/releases/tag/v2) version, but now it
-provides a v2.1 version. We haven't tested our models with depth maps obtained
-via v2.1 and if you want to make sure that things work as expected, you must
-adjust the script to make sure it explicitly uses
-[v2.0](https://github.com/intel-isl/MiDaS/releases/tag/v2)!
 
-### CelebA-HQ
-Create a symlink `data/celebahq` pointing to a folder containing the `.npy`
-files of CelebA-HQ (instructions to obtain them can be found in the [PGGAN
-repository](https://github.com/tkarras/progressive_growing_of_gans)).
+## Running the Paper's VQGAN + Transformer on new data
+As mentioned at the start of the blog, we were first interested in applying a Deep Reinforcement Learning paper, which utilised this VQGAN to recreate world models of environments, specifically Atari environments. Our curiosity to whether or not this could indeed be done led us to testing the VQGAN on a custom dataset of the Atari game Montezuma's revenge, which is known to be one of the most difficult environments for Deep Reinforcement Learning agents to solve. We gathered this data from the following GitHub repository: "https://github.com/yobibyte/atarigrandchallenge".
 
-### FFHQ
-Create a symlink `data/ffhq` pointing to the `images1024x1024` folder obtained
-from the [FFHQ repository](https://github.com/NVlabs/ffhq-dataset).
+An example of an image from the game can be seen below (these are four appended game states).
 
-### S-FLCKR
-Unfortunately, we are not allowed to distribute the images we collected for the
-S-FLCKR dataset and can therefore only give a description how it was produced.
-There are many resources on [collecting images from the
-web](https://github.com/adrianmrit/flickrdatasets) to get started.
-We collected sufficiently large images from [flickr](https://www.flickr.com)
-(see `data/flickr_tags.txt` for a full list of tags used to find images)
-and various [subreddits](https://www.reddit.com/r/sfwpornnetwork/wiki/network)
-(see `data/subreddits.txt` for all subreddits that were used).
-Overall, we collected 107625 images, and split them randomly into 96861
-training images and 10764 validation images. We then obtained segmentation
-masks for each image using [DeepLab v2](https://arxiv.org/abs/1606.00915)
-trained on [COCO-Stuff](https://arxiv.org/abs/1612.03716). We used a [PyTorch
-reimplementation](https://github.com/kazuto1011/deeplab-pytorch) and include an
-example script for this process in `scripts/extract_segmentation.py`.
+![Atari original](Images_blogpost/montezuma_original.png)
 
-### COCO
-Create a symlink `data/coco` containing the images from the 2017 split in
-`train2017` and `val2017`, and their annotations in `annotations`. Files can be
-obtained from the [COCO webpage](https://cocodataset.org/). In addition, we use
-the [Stuff+thing PNG-style annotations on COCO 2017
-trainval](http://calvin.inf.ed.ac.uk/wp-content/uploads/data/cocostuffdataset/stuffthingmaps_trainval2017.zip)
-annotations from [COCO-Stuff](https://github.com/nightrome/cocostuff), which
-should be placed under `data/cocostuffthings`.
 
-### ADE20k
-Create a symlink `data/ade20k_root` containing the contents of
-[ADEChallengeData2016.zip](http://data.csail.mit.edu/places/ADEchallenge/ADEChallengeData2016.zip)
-from the [MIT Scene Parsing Benchmark](http://sceneparsing.csail.mit.edu/).
+After training, the VQGAN was able to reproduce the results quite well, and we take a look at the reproduced version of the image above.
 
-## Training models
 
-### FacesHQ
+![Atari reconstructed](Images_blogpost/montezuma_reconstructed.png)
 
-Train a VQGAN with
-```
-python main.py --base configs/faceshq_vqgan.yaml -t True --gpus 0,
-```
+As we can see, the images are pretty close to one another, missing out on only minor details, such as the skull not completely formed in the recreated images. We conclude that using VQGAN's for the recreation of Atari environments is quite feasible, even on the small amount of computing power that was available to us.
 
-Then, adjust the checkpoint path of the config key
-`model.params.first_stage_config.params.ckpt_path` in
-`configs/faceshq_transformer.yaml` (or download
-[2020-11-09T13-33-36_faceshq_vqgan](https://k00.fr/uxy5usa9) and place into `logs`, which
-corresponds to the preconfigured checkpoint path), then run
-```
-python main.py --base configs/faceshq_transformer.yaml -t True --gpus 0,
-```
 
-### D-RIN
+## Conclusion
+As mentioned at the start, we aimed to replicate the paper's model by building the VQGAN from scratch, retraining the author's model on both old and new datasets, and also running the models with the pretrained weights of the models.
 
-Train a VQGAN on ImageNet with
-```
-python main.py --base configs/imagenet_vqgan.yaml -t True --gpus 0,
-```
+We relatively successfully recreated the VQGAN and have some results on the Atari environments, but not as spectacular as the model written by the authors, due to potential issues outlined in that subsection.
 
-or download a pretrained one from [2020-09-23T17-56-33_imagenet_vqgan](https://k00.fr/u0j2dtac)
-and place under `logs`. If you trained your own, adjust the path in the config
-key `model.params.first_stage_config.params.ckpt_path` of
-`configs/drin_transformer.yaml`.
+The retraining of the full model on the COCO dataset was, relative to the author's results, quite unsuccessful, due to a lack of computational power to train on a bigger dataset. Despite this the pictures still look relatively reasonable all things considered. Using the pretrained weights of the authors, we get much better results, as can be seen from the recreated EEMCS and TU Delft Library pictures. We also showcase the model's ability for conditioning, using the segmentations of the pictures to get better overall results.
 
-Train a VQGAN on Depth Maps of ImageNet with
-```
-python main.py --base configs/imagenetdepth_vqgan.yaml -t True --gpus 0,
-```
+The retraining on the Montezuma's revenge data was very successful. As we've seen, the recreations are quite good, and we have decent FID scores as well. This is probably due to the fact that the Atari environment dataset is much simpler than COCO, which resulted in a better ability for the model to learn the images with the amount of computational power we had.
 
-or download a pretrained one from [2020-11-03T15-34-24_imagenetdepth_vqgan](https://k00.fr/55rlxs6i)
-and place under `logs`. If you trained your own, adjust the path in the config
-key `model.params.cond_stage_config.params.ckpt_path` of
-`configs/drin_transformer.yaml`.
-
-To train the transformer, run
-```
-python main.py --base configs/drin_transformer.yaml -t True --gpus 0,
-```
-
-## More Resources
-### Comparing Different First Stage Models
-The reconstruction and compression capabilities of different fist stage models can be analyzed in this [colab notebook](https://colab.research.google.com/github/CompVis/taming-transformers/blob/master/scripts/reconstruction_usage.ipynb). 
-In particular, the notebook compares two VQGANs with a downsampling factor of f=16 for each and codebook dimensionality of 1024 and 16384, 
-a VQGAN with f=8 and 8192 codebook entries and the discrete autoencoder of OpenAI's [DALL-E](https://github.com/openai/DALL-E) (which has f=8 and 8192 
-codebook entries).
-![firststages1](assets/first_stage_squirrels.png)
-![firststages2](assets/first_stage_mushrooms.png)
-
-### Other
-- A [video summary](https://www.youtube.com/watch?v=o7dqGcLDf0A&feature=emb_imp_woyt) by [Two Minute Papers](https://www.youtube.com/channel/UCbfYPyITQ-7l4upoX8nvctg).
-- A [video summary](https://www.youtube.com/watch?v=-wDSDtIAyWQ) by [Gradient Dude](https://www.youtube.com/c/GradientDude/about).
-- A [weights and biases report summarizing the paper](https://wandb.ai/ayush-thakur/taming-transformer/reports/-Overview-Taming-Transformers-for-High-Resolution-Image-Synthesis---Vmlldzo0NjEyMTY)
-by [ayulockin](https://github.com/ayulockin).
-- A [video summary](https://www.youtube.com/watch?v=JfUTd8fjtX8&feature=emb_imp_woyt) by [What's AI](https://www.youtube.com/channel/UCUzGQrN-lyyc0BWTYoJM_Sg).
-- Take a look at [ak9250's notebook](https://github.com/ak9250/taming-transformers/blob/master/tamingtransformerscolab.ipynb) if you want to run the streamlit demos on Colab.
-
-### Text-to-Image Optimization via CLIP
-VQGAN has been successfully used as an image generator guided by the [CLIP](https://github.com/openai/CLIP) model, both for pure image generation
-from scratch and image-to-image translation. We recommend the following notebooks/videos/resources:
-
- - [Advadnouns](https://twitter.com/advadnoun/status/1389316507134357506) Patreon and corresponding LatentVision notebooks: https://www.patreon.com/patronizeme
- - The [notebook]( https://colab.research.google.com/drive/1L8oL-vLJXVcRzCFbPwOoMkPKJ8-aYdPN) of [Rivers Have Wings](https://twitter.com/RiversHaveWings).
- - A [video](https://www.youtube.com/watch?v=90QDe6DQXF4&t=12s) explanation by [Dot CSV](https://www.youtube.com/channel/UCy5znSnfMsDwaLlROnZ7Qbg) (in Spanish, but English subtitles are available)
-
-![txt2img](assets/birddrawnbyachild.png)
-
-Text prompt: *'A bird drawn by a child'*
-
-## Shout-outs
-Thanks to everyone who makes their code and models available. In particular,
-
-- The architecture of our VQGAN is inspired by [Denoising Diffusion Probabilistic Models](https://github.com/hojonathanho/diffusion)
-- The very hackable transformer implementation [minGPT](https://github.com/karpathy/minGPT)
-- The good ol' [PatchGAN](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix) and [Learned Perceptual Similarity (LPIPS)](https://github.com/richzhang/PerceptualSimilarity)
-
-## BibTeX
-
-```
-@misc{esser2020taming,
-      title={Taming Transformers for High-Resolution Image Synthesis}, 
-      author={Patrick Esser and Robin Rombach and Björn Ommer},
-      year={2020},
-      eprint={2012.09841},
-      archivePrefix={arXiv},
-      primaryClass={cs.CV}
-}
-```
+In conclusion, we would consider that the author's came up with a very good model that can recreate and regenerate images quite well, especially when conditioning is utilised.
