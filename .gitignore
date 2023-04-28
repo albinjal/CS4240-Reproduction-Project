@@ -3,3 +3,5 @@ atari_v1
 logs/
 
 avi_results/
+.vscode/2021-01-20T16-04-20_coco_transformer/configs/2021-02-08T17-18-53-project.yaml
+deeplabv2_resnet101_msc-cocostuff164k-100000.pth
