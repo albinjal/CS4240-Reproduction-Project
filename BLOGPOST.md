@@ -1,4 +1,16 @@
-# Blog post for Deep Learning course
+# CS4240 – Reproductions of Taming Transformers for High-Resolution Image Synthesis
+
+By **Group 22**: Albin Jaldevik, Avi Halevy, and Aadam Wiggers.
+
+Primary tasks:
+- **Reproduced**: Existing code was evaluated. We conducted experiments with the COCO dataset, just like the authors.
+- **New data**: Evaluating different datasets to obtain similar results. We trained the model on images from Montezuma's revenge.
+- **New code variant**: Rewrote or ported existing code to be more efficient/readable. We ported the full VQGAN to pure Pytorch. See [VQ_GAN2.ipynb](VQ_GAN2.ipynb).
+
+
+[Original paper](https://openaccess.thecvf.com/content/CVPR2021/html/Esser_Taming_Transformers_for_High-Resolution_Image_Synthesis_CVPR_2021_paper.html?ref=https://githubhelp.com)
+
+
 
 ## Introduction
 In this blog, the mix of transformers with convolutional VQGAN and its applications are explained. In 2021, P. Esser, R. Rombach, and B. Ommer combine transformers and CNNs to generate images, with the ability to add conditional synthesis tasks, such as segmentations, to control the generated image. Their results, at the time, obtained state of the art among autoregressive models on class-conditional ImageNet. Our goal for this blog is to provide the reader with a brief look into the combination of VQGANs and transformers, a from scratch PyTorch implementation of the VQGAN, retraining of the original models, and the application of the authors work to a dataset of Atari environments (Montezuma's revenge).
@@ -154,7 +166,7 @@ As we can see, the images are pretty close to one another, missing out on only m
 
 
 ## Conclusion
-As mentioned at the start, we aimed to replicate the paper's model by building the VQGAN from scratch, retraining the author's model on both old and new datasets, and also running the models with the pretrained weights of the models. 
+As mentioned at the start, we aimed to replicate the paper's model by building the VQGAN from scratch, retraining the author's model on both old and new datasets, and also running the models with the pretrained weights of the models.
 
 We relatively successfully recreated the VQGAN and have some results on the Atari environments, but not as spectacular as the model written by the authors, due to potential issues outlined in that subsection.
 
