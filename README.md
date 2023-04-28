@@ -171,3 +171,10 @@ The retraining of the full model on the COCO dataset was, relative to the author
 The retraining on the Montezuma's revenge data was very successful. As we've seen, the recreations are quite good, and we have decent FID scores as well. This is probably due to the fact that the Atari environment dataset is much simpler than COCO, which resulted in a better ability for the model to learn the images with the amount of computational power we had.
 
 In conclusion, we would consider that the author's came up with a very good model that can recreate and regenerate images quite well, especially when conditioning is utilised.
+
+
+### Contributions
+All parties contributed equally and all helped with writing this blog post. Additionally:
+- Albin: Set up the GCP VM and ran the experiments + training on the COCO dataset.
+- Avi: Rewrote the VQGAN without Pytorch and trained it on the VM.
+- Aadam: Conducted the experiments on the Montezuma's revenge dataset.
